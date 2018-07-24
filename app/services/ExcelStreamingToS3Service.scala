@@ -262,9 +262,9 @@ class ExcelStreamingToS3Service (awsAccess: AWSAccess) {
 			readAndUpload(pi)
 
 			/* Generate a bunch of stuff in the excel sheet until we're done. */
-			(1 to 7500).foreach { rowNumber =>
+			(1 to 20000).foreach { rowNumber =>
 				val row = sheet.createRow(rowNumber)
-				(1 to 10).foreach { cellNumber =>
+				(1 to 100).foreach { cellNumber =>
 					val cell = row.createCell(cellNumber)
 					cell.setCellValue(rowNumber + "x" + cellNumber)
 				}
