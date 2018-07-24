@@ -10,3 +10,10 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 libraryDependencies += guice
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
+
+libraryDependencies += "org.apache.poi" % "poi" % "3.17"
+libraryDependencies += "org.apache.poi" % "poi-ooxml" % "3.17"
+
+libraryDependencies += "commons-io" % "commons-io" % "2.6"
+
+libraryDependencies += "com.amazonaws" % "aws-java-sdk-s3" % "1.11.371"
