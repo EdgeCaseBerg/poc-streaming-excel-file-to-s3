@@ -3,6 +3,7 @@ package controllers
 import javax.inject.Inject
 
 import models.AWSAccess
+import services.ExcelStreamingToS3Service
 import play.api.data._
 import play.api.i18n._
 import play.api.mvc._
@@ -38,7 +39,8 @@ class PoCController @Inject()(cc: MessagesControllerComponents) extends Messages
     val successFunction = { data: Data =>
       // This is the good case, where the form was successfully parsed as a Data object.
       val creds = AWSAccess(key = data.accessKey, secret = data.accessSecret)
-      // TODO: Do the actual work
+      val estss = new ExcelStreamingToS3Service(creds)
+      estss.start()
       Redirect(routes.PoCController.startUploadForm()).flashing("info" -> "Streaming started!")
     }
 
