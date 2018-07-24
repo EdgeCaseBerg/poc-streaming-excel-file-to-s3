@@ -43,6 +43,9 @@ import com.amazonaws.services.s3.model.UploadPartResult;
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
+/** 
+ * Proof of concept code, may contain mess or un-disposed of resources 
+ */
 class ExcelStreamingToS3Service (awsAccess: AWSAccess) {
 	val maxRowsInMemory: Int = 200 // Low number just to force things
 	
@@ -188,7 +191,7 @@ class ExcelStreamingToS3Service (awsAccess: AWSAccess) {
 
 							// Reset byteBuffer and partNumber for next iteration
 							partNumber = partNumber + 1
-							templateBytes.reset()
+							templateBytes.reset() //TODO figure out how to deal with this/
 						} else {
 							// We don'thave enough bytes yet, so keep on accumulating
 							println("Fetching more data from buffer..., read: " + bytesRead + " bytes last read.")
@@ -223,7 +226,14 @@ class ExcelStreamingToS3Service (awsAccess: AWSAccess) {
 	def start() {
 		/* This input stream will slowly fill up with the excel files contents. */
 		val pi = new PipedInputStream(1024 * 1024)
-		/* Decorate the output stream so we can hook into it with the pipe */
+		/* Decorate the output stream so we can hook into it with the pipe,
+		 * that way, as the data is created and sent out to the temporary files
+		 * we also capture the input and send it out to s3. Since the java doc
+		 * isn't really clear if I get a copy and the rest of the data goes out
+		 * to the file or not, we may or may not be writing to temporary files or
+		 * intercepting it. I haven't looked at the underlying source so I don't know.
+		 * @see https://poi.apache.org/apidocs/org/apache/poi/xssf/streaming/SheetDataWriter.html#decorateOutputStream-java.io.FileOutputStream-
+		 */
 		val workbook = new SXSSFWorkbook(maxRowsInMemory) {
 			override protected def createSheetDataWriter(): SheetDataWriter = {
 				if(isCompressTempFiles()) {
@@ -241,6 +251,12 @@ class ExcelStreamingToS3Service (awsAccess: AWSAccess) {
 				}
 			}
 		}
+		/* 
+		 * SXSSF writes sheet data in temporary files (a temp file per-sheet) and the size of these 
+		 * temp files can grow to to a very large size, e.g. for a 20 MB csv data the size of the 
+		 * temp xml file become few GB large. If the "compress" flag is set to true then the 
+		 * temporary XML is gzipped.
+		 */
 		workbook.setCompressTempFiles(true)
 		try {
 			val sheet = workbook.createSheet()
