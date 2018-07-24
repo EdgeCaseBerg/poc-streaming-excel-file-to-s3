@@ -38,7 +38,7 @@ class PoCController @Inject()(cc: MessagesControllerComponents) extends Messages
 
     val successFunction = { data: Data =>
       // This is the good case, where the form was successfully parsed as a Data object.
-      val creds = AWSAccess(key = data.accessKey, secret = data.accessSecret)
+      val creds = AWSAccess(key = data.accessKey, secret = data.accessSecret, bucket = data.s3Bucket)
       val estss = new ExcelStreamingToS3Service(creds)
       estss.start()
       Redirect(routes.PoCController.startUploadForm()).flashing("info" -> "Streaming started!")

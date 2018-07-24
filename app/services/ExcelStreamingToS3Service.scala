@@ -58,7 +58,6 @@ class ExcelStreamingToS3Service (awsAccess: AWSAccess) {
 		/* It's important to not be on the same thread when reading from the piped input stream */
 		Future {
 			val clientRegion = "us-west-2";
-			val bucketName = "ew-test-bucket";
 			val keyName = "test/streamed-excel.xlsx";
 
 			try {
@@ -71,7 +70,7 @@ class ExcelStreamingToS3Service (awsAccess: AWSAccess) {
 				/* Initiate the upload 
 				 * @see https://docs.aws.amazon.com/AmazonS3/latest/dev/llJavaUploadFile.html
 				 */
-				val initRequest: InitiateMultipartUploadRequest = new InitiateMultipartUploadRequest(bucketName, keyName);
+				val initRequest: InitiateMultipartUploadRequest = new InitiateMultipartUploadRequest(awsAccess.bucket, keyName);
 				val initResponse: InitiateMultipartUploadResult = s3Client.initiateMultipartUpload(initRequest);
 
 				/* First create the template/wrapper parts of the file. 
@@ -178,7 +177,7 @@ class ExcelStreamingToS3Service (awsAccess: AWSAccess) {
 							println("Upload size: " + uploadSize)
 							// We have another bytes for a part, make it:
 							val uploadRequest: UploadPartRequest  = new UploadPartRequest()
-								.withBucketName(bucketName)
+								.withBucketName(awsAccess.bucket)
 								.withKey(keyName)
 								.withUploadId(initResponse.getUploadId())
 								.withPartNumber(partNumber)
@@ -202,7 +201,7 @@ class ExcelStreamingToS3Service (awsAccess: AWSAccess) {
 
 					// Complete the multipart upload.
 					val compRequest: CompleteMultipartUploadRequest = new CompleteMultipartUploadRequest(
-						bucketName, 
+						awsAccess.bucket, 
 						keyName,
 						initResponse.getUploadId(), 
 						partETags

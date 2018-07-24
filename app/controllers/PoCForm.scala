@@ -10,7 +10,7 @@ object PoCForm {
    * Using a class specifically for form binding reduces the chances
    * of a parameter tampering attack and makes code clearer.
    */
-  case class Data(accessKey: String, accessSecret: String)
+  case class Data(accessKey: String, accessSecret: String, s3Bucket: String)
 
   /**
    * The form definition for the "create a widget" form.
@@ -20,7 +20,8 @@ object PoCForm {
   val form = Form(
     mapping(
       "accessKey" -> nonEmptyText,
-      "accessSecret" -> nonEmptyText
+      "accessSecret" -> nonEmptyText,
+      "s3Bucket" -> nonEmptyText
     )(Data.apply)(Data.unapply)
   )
 }
