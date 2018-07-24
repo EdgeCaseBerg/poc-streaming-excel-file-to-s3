@@ -152,7 +152,9 @@ class ExcelStreamingToS3Service (awsAccess: AWSAccess) {
 						)
 
 						/* Zip the byte buffer data */
-						zos.write(byteBuffer)
+						if (bytesRead != -1) {
+							zos.write(byteBuffer, 0, bytesRead)
+						}
 						zos.flush()
 
 						// Create the request to upload a part.
